@@ -1,118 +1,122 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Sekom Tech-Log Hub</title>
-  <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background: #1a1a2e; color: #eee; }
-    h1 { color: #e94560; text-align: center; border-bottom: 2px solid #e94560; padding-bottom: 10px; }
-    h2 { color: #0f3460; background: #e94560; display: inline-block; padding: 5px 15px; border-radius: 4px; font-size: 18px; }
-    .container { background: #16213e; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-    input, textarea, select { width: 100%; padding: 12px; margin: 8px 0 20px; background: #0f3460; color: #eee; border: 1px solid #e94560; border-radius: 4px; box-sizing: border-box; }
-    button { background: #e94560; color: white; padding: 15px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; font-size: 16px; transition: 0.3s; }
-    button:hover { background: #ff4d6d; transform: translateY(-2px); }
-    table { width: 100%; border-collapse: collapse; margin-top: 25px; background: #16213e; }
-    th, td { padding: 15px; border: 1px solid #0f3460; text-align: left; }
-    th { background: #0f3460; color: #e94560; }
-    .badge { padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; color: #fff; }
-    .tamamlandi { background: #27ae60; }
-    .devam { background: #f39c12; }
-    .beklemede { background: #2980b9; }
-    .search-box { border-left: 5px solid #e94560; padding-left: 15px; margin-top: 30px; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Sekom Tech-Log Hub v2</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 1000px; margin: 40px auto; padding: 20px; background: #1a1a2e; color: #eee; }
+        .container { background: #16213e; padding: 25px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
+        h1 { color: #e94560; text-align: center; border-bottom: 2px solid #e94560; padding-bottom: 10px; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0 15px; background: #0f3460; color: #eee; border: 1px solid #e94560; border-radius: 4px; box-sizing: border-box; }
+        button { background: #e94560; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #ff4d6d; transform: translateY(-2px); }
+        .btn-view { background: #00d2ff; color: #1a1a2e; padding: 5px 10px; font-size: 12px; }
+        
+        /* Modal (Detay Penceresi) */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
+        .modal-content { background: #16213e; margin: 5% auto; padding: 20px; width: 80%; max-width: 700px; border-radius: 12px; border: 1px solid #e94560; position: relative; }
+        .close { position: absolute; right: 20px; top: 10px; color: #e94560; font-size: 30px; cursor: pointer; }
+        #modalImg { width: 100%; border-radius: 8px; margin-top: 15px; border: 1px solid #444; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+        th, td { padding: 15px; border: 1px solid #0f3460; text-align: left; }
+        th { background: #0f3460; color: #e94560; }
+        .preview-img { width: 100px; height: 60px; object-fit: cover; border-radius: 4px; display: none; margin-bottom: 10px; border: 1px solid #e94560; }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🛠 Sekom Tech-Log Hub</h1>
-    
-    <h2>Yeni Kayıt Ekle</h2>
-    <input id="calisan" placeholder="Çalışan Adı (İsim Soyisim)" />
-    
-    <select id="durum">
-      <option value="Tamamlandı">✅ Tamamlandı</option>
-      <option value="Devam Ediyor">🔄 Devam Ediyor</option>
-      <option value="Beklemede">⏳ Beklemede</option>
-    </select>
-    
-    <textarea id="aciklama" placeholder="Çözülen problem veya yapılan işlem detayları..." rows="3"></textarea>
-    
-    <button onclick="kaydetEkle()">SİSTEME KAYDET</button>
-
-    <div class="search-box">
-      <h2>Kayıtlarda Ara</h2>
-      <input id="arama" placeholder="İsim veya çözüm içinde ara..." onkeyup="ara(this.value)" />
-    </div><table>
-      <thead>
-        <tr>
-          <th>Çalışan</th>
-          <th>Durum</th>
-          <th>Açıklama</th>
-        </tr>
-      </thead>
-      <tbody id="tablo">
-        <tr><td colspan="3" style="text-align:center">Veriler yükleniyor...</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <script>
-    const API = "http://sekom-api-esragune-s-dev.apps.rm2.thpm.p1.openshiftapps.com";
-
-    function durumBadge(durum) {
-      const cls = durum === "Tamamlandı" ? "tamamlandi" : durum === "Devam Ediyor" ? "devam" : "beklemede";
-      return `<span class="badge ${cls}">${durum}</span>`;
-    }
-
-    async function kayitlariGetir(url = API + "/logs") {
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        const tablo = document.getElementById("tablo");
+    <div class="container">
+        <h1>🛠 Sekom Tech-Log Hub v2</h1>
         
-        if (data.length === 0) {
-          tablo.innerHTML = `<tr><td colspan="3" style="text-align:center">Sonuç bulunamadı.</td></tr>`;
-          return;
+        <h2>Yeni Kayıt</h2>
+        <input id="calisan" placeholder="İsim Soyisim" />
+        <select id="durum">
+            <option value="Tamamlandı">✅ Tamamlandı</option>
+            <option value="Devam Ediyor">🔄 Devam Ediyor</option>
+            <option value="Beklemede">⏳ Beklemede</option>
+        </select>
+        <textarea id="aciklama" placeholder="Detaylı açıklama..." rows="3"></textarea>
+        
+        <label>Görsel Ekle (Opsiyonel):</label>
+        <img id="imgPreview" class="preview-img" />
+        <input type="file" id="resimInput" accept="image/*" onchange="previewFile()" />
+        
+        <button onclick="kaydetEkle()">SİSTEME KAYDET</button>
+
+        <input id="arama" style="margin-top:40px;" placeholder="Kayıtlarda ara..." onkeyup="ara(this.value)" />
+        <table>
+            <thead><tr><th>Çalışan</th><th>Durum</th><th>İşlem</th></tr></thead>
+            <tbody id="tablo"></tbody>
+        </table>
+    </div>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle" style="color:#e94560"></h2>
+            <p id="modalStatus"></p>
+            <hr border="0" height="1px" background="#e94560">
+            <p id="modalDesc" style="white-space: pre-wrap;"></p>
+            <img id="modalImg" src="" alt="Görsel yok">
+        </div>
+    </div>
+
+    <script>
+        const API = "http://sekom-api-esragune-s-dev.apps.rm2.thpm.p1.openshiftapps.com";
+        let base64String = "";
+
+        function previewFile() {
+            const file = document.querySelector('#resimInput').files[0];
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                base64String = reader.result;
+                const preview = document.getElementById('imgPreview');
+                preview.src = reader.result;
+                preview.style.display = 'block';
+            }
+            if (file) { reader.readAsDataURL(file); }
+        }
+        async function kayitlariGetir(url = API + "/logs") {
+            const res = await fetch(url);
+            const data = await res.json();
+            const tablo = document.getElementById("tablo");
+            tablo.innerHTML = data.reverse().map(l => `
+                <tr>
+                    <td>${l.calisan || "Bilinmiyor"}</td>
+                    <td>${l.durum}</td>
+                    <td><button class="btn-view" onclick="detayGor('${l._id}')">🔍 Detay</button></td>
+                </tr>
+            `).join("");
         }
 
-        tablo.innerHTML = data.reverse().map(l => 
-          `<tr>
-            <td><strong>${l.calisan || l.muhendis || "Bilinmiyor"}</strong></td>
-            <td>${durumBadge(l.durum || "Belirsiz")}</td>
-            <td>${l.aciklama || l.not || ""}</td>
-          </tr>`
-        ).join("");
-      } catch (e) {
-        console.error("Hata:", e);
-      }
-    }async function kaydetEkle() {
-      const calisan = document.getElementById("calisan").value;
-      const durum = document.getElementById("durum").value;
-      const aciklama = document.getElementById("aciklama").value;
+        async function detayGor(id) {
+            const res = await fetch(`${API}/logs/${id}`);
+            const l = await res.json();
+            document.getElementById("modalTitle").innerText = l.calisan;
+            document.getElementById("modalStatus").innerText = "Durum: " + l.durum;
+            document.getElementById("modalDesc").innerText = l.aciklama;
+            document.getElementById("modalImg").src = l.resim || "https://via.placeholder.com/400x200?text=Gorsel+Yok";
+            document.getElementById("myModal").style.display = "block";
+        }
 
-      if(!calisan || !aciklama) { alert("Lütfen isim ve açıklama alanlarını doldurun!"); return; }
+        async function kaydetEkle() {
+            const calisan = document.getElementById("calisan").value;
+            const durum = document.getElementById("durum").value;
+            const aciklama = document.getElementById("aciklama").value;
+            if(!calisan || !aciklama) return alert("Lütfen alanları doldurun!");
 
-      await fetch(API + "/logs", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ calisan, durum, aciklama })
-      });
+            await fetch(API + "/logs", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ calisan, durum, aciklama, resim: base64String })
+            });
 
-      alert("🚀 Kayıt başarıyla Tech-Log Hub'a eklendi!");
-      document.getElementById("calisan").value = "";
-      document.getElementById("aciklama").value = "";
-      kayitlariGetir();
-    }
-
-    function ara(kelime) {
-      if (kelime.trim() === "") {
-        kayitlariGetir(); // Arama kutusu boşsa tüm listeyi getir
-      } else {
-        kayitlariGetir(API + "/search?q=" + kelime);
-      }
-    }// İlk açılışta verileri çek
-    kayitlariGetir();
-  </script>
+            alert("🚀 Başarıyla kaydedildi!");
+            location.reload();
+        }
+         function closeModal() { document.getElementById("myModal").style.display = "none"; }
+        function ara(kelime) { kayitlariGetir(kelime.trim() ? API + "/search?q=" + kelime : API + "/logs"); }
+        kayitlariGetir();
+    </script>
 </body>
 </html>
-
 
