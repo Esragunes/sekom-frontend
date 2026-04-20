@@ -12,17 +12,38 @@
         button:hover { background: #ff4d6d; transform: translateY(-2px); }
         .btn-view { background: #00d2ff; color: #1a1a2e; padding: 5px 10px; font-size: 12px; }
         
-        /* Modal (Detay Penceresi) */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
-        .modal-content { background: #16213e; margin: 5% auto; padding: 20px; width: 80%; max-width: 700px; border-radius: 12px; border: 1px solid #e94560; position: relative; }
-        .close { position: absolute; right: 20px; top: 10px; color: #e94560; font-size: 30px; cursor: pointer; }
-        #modalImg { width: 100%; border-radius: 8px; margin-top: 15px; border: 1px solid #444; }
+        .modal-content { 
+    background: #16213e; 
+    margin: 2% auto; 
+    padding: 20px; 
+    width: 90%; 
+    max-width: 800px; 
+    max-height: 90vh; /* Ekran boyunun %90'ını geçmesin */
+    overflow-y: auto; /* İçerik taşarsa içeride kaydırılsın */
+    border-radius: 12px; 
+    border: 2px solid #e94560; 
+}
 
-        table { width: 100%; border-collapse: collapse; margin-top: 30px; }
-        th, td { padding: 15px; border: 1px solid #0f3460; text-align: left; }
-        th { background: #0f3460; color: #e94560; }
-        .preview-img { width: 100px; height: 60px; object-fit: cover; border-radius: 4px; display: none; margin-bottom: 10px; border: 1px solid #e94560; }
-    </style>
+/* Resmin her zaman kutuya sığmasını sağlayan sihirli dokunuş */
+#modalImg { 
+    width: 100%; 
+    max-width: 100%; 
+    height: auto; 
+    object-fit: contain; /* Resmi bozmadan sığdır */
+    border-radius: 8px; 
+    margin-top: 15px; 
+    border: 1px solid #444; 
+}
+/* Resmin her zaman kutuya sığmasını sağlayan sihirli dokunuş */
+#modalImg { 
+    width: 100%; 
+    max-width: 100%; 
+    height: auto; 
+    object-fit: contain; /* Resmi bozmadan sığdır */
+    border-radius: 8px; 
+    margin-top: 15px; 
+    border: 1px solid #444; 
+}    </style>
 </head>
 <body>
     <div class="container">
