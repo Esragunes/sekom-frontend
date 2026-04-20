@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Sekom Tech-Log</title>
+  <style>
+    body { font-family: Arial; max-width: 800px; margin: 40px auto; padding: 20px; background: #1a1a2e; color: #eee; }
+    h1 { color: #e94560; }
+    input, textarea, select { width: 100%; padding: 8px; margin: 5px 0 15px; background: #16213e; color: #eee; border: 1px solid #e94560; border-radius: 4px; }
+    button { background: #e94560; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #e94560; text-align: left; }
+    th { background: #e94560; }
+  </style>
+</head>
+<body>
+  <h1>🛠 Sekom Tech-Log Hub</h1>
+
+  <h2>Yeni Log Ekle</h2>
+  <input id="muhendis" placeholder="Mühendis Adı" />
+  <input id="durum" placeholder="Durum (Basarili / Devam Ediyor)" />
+  <textarea id="not" placeholder="Not / Açıklama" rows="3"></textarea>
+  <button onclick="logEkle()">Kaydet</button>
+
+  <h2>Loglar</h2>
+  <input id="arama" placeholder="Ara..." oninput="ara(this.value)" />
+  <table>
+    <thead><tr><th>Mühendis</th><th>Durum</th><th>Not</th></tr></thead>
+    <tbody id="tablo"></tbody>
+  </table>
+
+  <script>
+    const API = "http://sekom-api-esragune-s-dev.apps.rm2.thpm.p1.openshiftapps.com";
+
+    async function loglariGetir(url = API + "/logs") {
+      const res = await fetch(url);
+      const data = await res.json();
+      const tablo = document.getElementById("tablo");
+      tablo.innerHTML = data.map(l =>
+        `<tr><td>${l.muhendis||""}</td><td>${l.durum||""}</td><td>${l.not||""}</td></tr>`
+      ).join("");
+    }
+
+    async function logEkle() {
+      await fetch(API + "/logs", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          muhendis: document.getElementById("muhendis").value,
+          durum: document.getElementById("durum").value,
+          not: document.getElementById("not").value
+        })
+      });
+      loglariGetir();
+    }
+
+    function ara(kelime) {
+      loglariGetir(API + "/search?q=" + kelime);
+    }
+
+    loglariGetir();
+  </script>
+</body>
+</html>
