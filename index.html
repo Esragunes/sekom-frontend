@@ -6,59 +6,83 @@
   <style>
     body { font-family: Arial; max-width: 800px; margin: 40px auto; padding: 20px; background: #1a1a2e; color: #eee; }
     h1 { color: #e94560; }
-    input, textarea, select { width: 100%; padding: 8px; margin: 5px 0 15px; background: #16213e; color: #eee; border: 1px solid #e94560; border-radius: 4px; }
-    button { background: #e94560; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+    input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px; background: #16213e; color: #eee; border: 1px solid #e94560; border-radius: 4px; box-sizing: border-box; }
+    button { background: #e94560; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+    button:hover { background: #ff4d6d; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 10px; border: 1px solid #e94560; text-align: left; }
+    th, td { padding: 12px; border: 1px solid #e94560; text-align: left; }
     th { background: #e94560; }
+    .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: #000; }
+    .tamamlandi { background: #2ecc71; }
+    .devam { background: #f39c12; }
+    .beklemede { background: #3498db; }
   </style>
 </head>
-<body>
-  <h1>🛠 Sekom Tech-Log Hub</h1>
+<body><h1>🛠 Sekom Deneyim Bankası</h1>
+  
+  <h2>Yeni Kayıt Ekle</h2>
+  <label>Çalışan Adı:</label>
+  <input id="calisan" placeholder="İsim Soyisim" />
+  
+  <label>Durum Seçin:</label>
+  <select id="durum">
+    <option value="Tamamlandı">✅ Tamamlandı</option>
+    <option value="Devam Ediyor">🔄 Devam Ediyor</option>
+    <option value="Beklemede">⏳ Beklemede</option>
+  </select>
+  
+  <label>Açıklama / Çözüm:</label>
+  <textarea id="aciklama" placeholder="Ne yapıldı?" rows="3"></textarea>
+  
+  <button onclick="kaydetEkle()">KAYDET</button>
 
-  <h2>Yeni Log Ekle</h2>
-  <input id="muhendis" placeholder="Mühendis Adı" />
-  <input id="durum" placeholder="Durum (Basarili / Devam Ediyor)" />
-  <textarea id="not" placeholder="Not / Açıklama" rows="3"></textarea>
-  <button onclick="logEkle()">Kaydet</button>
-
-  <h2>Loglar</h2>
-  <input id="arama" placeholder="Ara..." oninput="ara(this.value)" />
+  <h2>Geçmiş Kayıtlar</h2>
+  <input id="arama" placeholder="Çalışan veya içerik ara..." oninput="ara(this.value)" />
   <table>
-    <thead><tr><th>Mühendis</th><th>Durum</th><th>Not</th></tr></thead>
+    <thead><tr><th>Çalışan</th><th>Durum</th><th>Açıklama</th></tr></thead>
     <tbody id="tablo"></tbody>
   </table>
 
   <script>
     const API = "http://sekom-api-esragune-s-dev.apps.rm2.thpm.p1.openshiftapps.com";
 
-    async function loglariGetir(url = API + "/logs") {
+    function durumBadge(durum) {
+      const cls = durum === "Tamamlandı" ? "tamamlandi" : durum === "Devam Ediyor" ? "devam" : "beklemede";
+      return `<span class="badge ${cls}">${durum}</span>`;
+    }
+
+    async function kayitlariGetir(url = API + "/logs") {
       const res = await fetch(url);
       const data = await res.json();
       const tablo = document.getElementById("tablo");
-      tablo.innerHTML = data.map(l =>
-        `<tr><td>${l.muhendis||""}</td><td>${l.durum||""}</td><td>${l.not||""}</td></tr>`
+      tablo.innerHTML = data.reverse().map(l => 
+        `<tr><td>${l.calisan || l.muhendis || "Bilinmiyor"}</td><td>${durumBadge(l.durum || "Belirsiz")}</td><td>${l.aciklama || l.not || ""}</td></tr>`
       ).join("");
     }
 
-    async function logEkle() {
+    async function kaydetEkle() {
+      const calisan = document.getElementById("calisan").value;
+      const durum = document.getElementById("durum").value;
+      const aciklama = document.getElementById("aciklama").value;
+
+      if(!calisan || !aciklama) { alert("Lütfen boş alan bırakmayın!"); return; }
+
       await fetch(API + "/logs", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          muhendis: document.getElementById("muhendis").value,
-          durum: document.getElementById("durum").value,
-          not: document.getElementById("not").value
-        })
+        body: JSON.stringify({ calisan, durum, aciklama })
       });
-      loglariGetir();
+
+      alert("🎉 Kayıt başarıyla eklendi!"); // Bilgilendirme eklendi
+      document.getElementById("calisan").value = "";
+      document.getElementById("aciklama").value = "";
+      kayitlariGetir();
     }
 
     function ara(kelime) {
-      loglariGetir(API + "/search?q=" + kelime);
+      kayitlariGetir(API + "/search?q=" + kelime);
     }
-
-    loglariGetir();
+    kayitlariGetir();
   </script>
 </body>
 </html>
