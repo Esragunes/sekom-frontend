@@ -8,136 +8,121 @@
         .container { background: #16213e; padding: 25px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
         h1 { color: #e94560; text-align: center; border-bottom: 2px solid #e94560; padding-bottom: 10px; }
         input, textarea, select { width: 100%; padding: 12px; margin: 8px 0 15px; background: #0f3460; color: #eee; border: 1px solid #e94560; border-radius: 4px; box-sizing: border-box; }
-        button { background: #e94560; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #ff4d6d; transform: translateY(-2px); }
-        .btn-view { background: #00d2ff; color: #1a1a2e; padding: 5px 10px; font-size: 12px; }
+        button { background: #e94560; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #ff4d6d; }
         
+        /* MODERN MODAL TASARIMI */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 52, 96, 0.95); backdrop-filter: blur(5px); }
         .modal-content { 
-    background: #16213e; 
-    margin: 2% auto; 
-    padding: 20px; 
-    width: 90%; 
-    max-width: 800px; 
-    max-height: 90vh; /* Ekran boyunun %90'ını geçmesin */
-    overflow-y: auto; /* İçerik taşarsa içeride kaydırılsın */
-    border-radius: 12px; 
-    border: 2px solid #e94560; 
-}
+            background: #16213e; 
+            margin: 5vh auto; 
+            padding: 30px; 
+            width: 85%; 
+            max-width: 800px; 
+            max-height: 85vh; 
+            overflow-y: auto; 
+            border-radius: 20px; 
+            border: 1px solid rgba(233, 69, 96, 0.3);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.8);
+            position: relative;
+        }
+        /* Çirkin kaydırma çubuğunu gizleyelim ama kaydırma çalışsın */
+        .modal-content::-webkit-scrollbar { display: none; }
+        .modal-content { -ms-overflow-style: none; scrollbar-width: none; }
+        #modalImg { 
+            width: 100%; 
+            height: auto; 
+            max-height: 450px; 
+            object-fit: contain; 
+            border-radius: 12px; 
+            margin-top: 20px; 
+            border: 2px solid #0f3460;
+            background: #0f3460;
+        }
+        .close { position: absolute; right: 25px; top: 15px; color: #e94560; font-size: 35px; cursor: pointer; transition: 0.3s; }
+        .close:hover { color: white; }
 
-/* Resmin her zaman kutuya sığmasını sağlayan sihirli dokunuş */
-#modalImg { 
-    width: 100%; 
-    max-width: 100%; 
-    height: auto; 
-    object-fit: contain; /* Resmi bozmadan sığdır */
-    border-radius: 8px; 
-    margin-top: 15px; 
-    border: 1px solid #444; 
-}
-/* Resmin her zaman kutuya sığmasını sağlayan sihirli dokunuş */
-#modalImg { 
-    width: 100%; 
-    max-width: 100%; 
-    height: auto; 
-    object-fit: contain; /* Resmi bozmadan sığdır */
-    border-radius: 8px; 
-    margin-top: 15px; 
-    border: 1px solid #444; 
-}    </style>
+        table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+        th, td { padding: 15px; border-bottom: 1px solid #0f3460; text-align: left; }
+        th { color: #e94560; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-view { background: transparent; color: #00d2ff; border: 1px solid #00d2ff; padding: 6px 12px; border-radius: 20px; cursor: pointer; transition: 0.3s; }
+        .btn-view:hover { background: #00d2ff; color: #1a1a2e; }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>🛠 Sekom Tech-Log Hub v2</h1>
-        
-        <h2>Yeni Kayıt</h2>
         <input id="calisan" placeholder="İsim Soyisim" />
         <select id="durum">
             <option value="Tamamlandı">✅ Tamamlandı</option>
             <option value="Devam Ediyor">🔄 Devam Ediyor</option>
             <option value="Beklemede">⏳ Beklemede</option>
         </select>
-        <textarea id="aciklama" placeholder="Detaylı açıklama..." rows="3"></textarea>
-        
-        <label>Görsel Ekle (Opsiyonel):</label>
-        <img id="imgPreview" class="preview-img" />
-        <input type="file" id="resimInput" accept="image/*" onchange="previewFile()" />
-        
-        <button onclick="kaydetEkle()">SİSTEME KAYDET</button>
-
-        <input id="arama" style="margin-top:40px;" placeholder="Kayıtlarda ara..." onkeyup="ara(this.value)" />
+        <textarea id="aciklama" placeholder="Ne çözdün? Anlat bakalım..." rows="3"></textarea>
+        <input type="file" id="resimInput" accept="image/*" onchange="previewFile()" style="color:#e94560; cursor:pointer;" />
+        <button onclick="kaydetEkle()" style="width:100%; margin-top:10px;">SİSTEME KAYDET</button>
+        <input id="arama" style="margin-top:40px;" placeholder="Geçmiş kayıtlarda ara..." onkeyup="ara(this.value)" />
         <table>
-            <thead><tr><th>Çalışan</th><th>Durum</th><th>İşlem</th></tr></thead>
+            <thead><tr><th>Çalışan</th><th>Durum</th><th></th></tr></thead>
             <tbody id="tablo"></tbody>
         </table>
     </div>
-    <div id="myModal" class="modal">
+    
+    <div id="myModal" class="modal" onclick="if(event.target==this) closeModal()">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
-            <h2 id="modalTitle" style="color:#e94560"></h2>
-            <p id="modalStatus"></p>
-            <hr border="0" height="1px" background="#e94560">
-            <p id="modalDesc" style="white-space: pre-wrap;"></p>
-            <img id="modalImg" src="" alt="Görsel yok">
+            <h2 id="modalTitle" style="color:#e94560; margin:0 0 10px 0;"></h2>
+            <div id="modalStatus" style="font-weight:bold; margin-bottom:15px; color:#00d2ff;"></div>
+            <div id="modalDesc" style="white-space: pre-wrap; line-height:1.6; background: rgba(15, 52, 96, 0.5); padding: 15px; border-radius: 10px; border-left: 4px solid #e94560;"></div>
+            <img id="modalImg" src="" alt="Görsel">
         </div>
     </div>
 
     <script>
         const API = "http://sekom-api-esragune-s-dev.apps.rm2.thpm.p1.openshiftapps.com";
         let base64String = "";
-
         function previewFile() {
             const file = document.querySelector('#resimInput').files[0];
             const reader = new FileReader();
-            reader.onloadend = function() {
-                base64String = reader.result;
-                const preview = document.getElementById('imgPreview');
-                preview.src = reader.result;
-                preview.style.display = 'block';
-            }
-            if (file) { reader.readAsDataURL(file); }
+            reader.onloadend = () => { base64String = reader.result; };
+            if (file) reader.readAsDataURL(file);
         }
         async function kayitlariGetir(url = API + "/logs") {
             const res = await fetch(url);
             const data = await res.json();
-            const tablo = document.getElementById("tablo");
-            tablo.innerHTML = data.reverse().map(l => `
+            document.getElementById("tablo").innerHTML = data.reverse().map(l => `
                 <tr>
-                    <td>${l.calisan || "Bilinmiyor"}</td>
-                    <td>${l.durum}</td>
-                    <td><button class="btn-view" onclick="detayGor('${l._id}')">🔍 Detay</button></td>
+                    <td><strong>${l.calisan || "Bilinmiyor"}</strong></td>
+                    <td><span style="font-size:14px;">${l.durum}</span></td>
+                    <td style="text-align:right;"><button class="btn-view" onclick="detayGor('${l._id}')">🔍 Detayları Gör</button></td>
                 </tr>
             `).join("");
         }
-
         async function detayGor(id) {
             const res = await fetch(`${API}/logs/${id}`);
             const l = await res.json();
             document.getElementById("modalTitle").innerText = l.calisan;
-            document.getElementById("modalStatus").innerText = "Durum: " + l.durum;
+            document.getElementById("modalStatus").innerText = "📌 Durum: " + l.durum;
             document.getElementById("modalDesc").innerText = l.aciklama;
             document.getElementById("modalImg").src = l.resim || "https://via.placeholder.com/400x200?text=Gorsel+Yok";
             document.getElementById("myModal").style.display = "block";
         }
-
         async function kaydetEkle() {
-            const calisan = document.getElementById("calisan").value;
-            const durum = document.getElementById("durum").value;
-            const aciklama = document.getElementById("aciklama").value;
-            if(!calisan || !aciklama) return alert("Lütfen alanları doldurun!");
-
+            const c = document.getElementById("calisan").value;
+            const d = document.getElementById("durum").value;
+            const a = document.getElementById("aciklama").value;
+            if(!c || !a) return alert("Boş bırakma canım!");
             await fetch(API + "/logs", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({ calisan, durum, aciklama, resim: base64String })
+                body: JSON.stringify({ calisan: c, durum: d, aciklama: a, resim: base64String })
             });
-
-            alert("🚀 Başarıyla kaydedildi!");
+            alert("🚀 Kayıt Bankaya Eklendi!");
             location.reload();
         }
-         function closeModal() { document.getElementById("myModal").style.display = "none"; }
-        function ara(kelime) { kayitlariGetir(kelime.trim() ? API + "/search?q=" + kelime : API + "/logs"); }
+        function closeModal() { document.getElementById("myModal").style.display = "none"; }
+        function ara(k) { kayitlariGetir(k.trim() ? API + "/search?q="+k : API + "/logs"); }
         kayitlariGetir();
     </script>
 </body>
 </html>
-
